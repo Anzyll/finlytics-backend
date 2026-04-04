@@ -9,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+
 @RestController
 @RequestMapping("/api/records")
 @RequiredArgsConstructor
@@ -25,12 +27,23 @@ public class FinancialRecordController {
     }
 
     @GetMapping
-    public ResponseEntity<?> getAll() {
+    public ResponseEntity<?> getRecords(
+            @RequestParam(required = false) String type,
+            @RequestParam(required = false) Long categoryId,
+            @RequestParam(required = false) LocalDate startDate,
+            @RequestParam(required = false) LocalDate endDate,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+
         Long userId = SecurityUtil.getCurrentUserId();
-        return ResponseEntity.ok(service.getAll(userId));
+
+        return ResponseEntity.ok(
+                service.getFilteredRecords(userId, type, categoryId, startDate, endDate,page,size)
+        );
     }
 
-    @PatchMapping("/{id}") // 🔥 better for partial update
+    @PatchMapping("/{id}")
     public ResponseEntity<?> update(
             @PathVariable Long id,
             @RequestBody FinancialRecordUpdateRequest req

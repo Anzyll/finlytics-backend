@@ -7,8 +7,13 @@ import com.anzil.finlytics.record.entity.*;
 import com.anzil.finlytics.record.mapper.FinancialRecordMapper;
 import com.anzil.finlytics.record.repository.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -29,11 +34,23 @@ public class FinancialRecordService {
         return mapper.toResponse(recordRepo.save(record));
     }
 
-    public List<FinancialRecordResponse> getAll(Long userId) {
-        return recordRepo.findByUserId(userId)
-                .stream()
-                .map(mapper::toResponse)
-                .toList();
+    public Page<FinancialRecordResponse> getFilteredRecords(
+            Long userId,
+            String type,
+            Long categoryId,
+            LocalDate startDate,
+            LocalDate endDate,
+            int page,
+            int size
+
+    ) {
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by("date").descending());
+
+        Page<FinancialRecord> records =
+                recordRepo.findByFilters(userId, type, categoryId, startDate, endDate, pageable);
+
+        return records.map(mapper::toResponse);
     }
 
     public FinancialRecordResponse update(Long id, FinancialRecordUpdateRequest req, Long userId) {
@@ -53,7 +70,6 @@ public class FinancialRecordService {
                     .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
             record.setCategory(category);
         }
-
         if (req.date() != null) record.setDate(req.date());
         if (req.notes() != null) record.setNotes(req.notes());
 
@@ -68,7 +84,6 @@ public class FinancialRecordService {
         if (!record.getUserId().equals(userId)) {
             throw new AppException(ErrorCode.FORBIDDEN);
         }
-
         recordRepo.delete(record);
     }
 }
