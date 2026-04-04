@@ -1,5 +1,6 @@
 package com.anzil.finlytics.record.service;
 
+import com.anzil.finlytics.audit.service.AuditLogService;
 import com.anzil.finlytics.common.exception.AppException;
 import com.anzil.finlytics.common.exception.ErrorCode;
 import com.anzil.finlytics.record.dto.*;
@@ -14,7 +15,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -23,6 +23,7 @@ public class FinancialRecordService {
     private final FinancialRecordRepository recordRepo;
     private final CategoryRepository categoryRepo;
     private final FinancialRecordMapper mapper;
+    private final AuditLogService auditLogService;
 
     public FinancialRecordResponse create(FinancialRecordCreateRequest req, Long userId) {
 
@@ -30,8 +31,9 @@ public class FinancialRecordService {
                 .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
 
         FinancialRecord record = mapper.toEntity(req, category, userId);
-
-        return mapper.toResponse(recordRepo.save(record));
+        FinancialRecord saved =recordRepo.save(record);
+        auditLogService.log(userId,"CREATE","FINANCIAL_RECORD",saved.getId());
+        return mapper.toResponse(saved);
     }
 
     public Page<FinancialRecordResponse> getFilteredRecords(
@@ -73,12 +75,12 @@ public class FinancialRecordService {
         }
         if (req.date() != null) record.setDate(req.date());
         if (req.notes() != null) record.setNotes(req.notes());
-
-        return mapper.toResponse(recordRepo.save(record));
+        FinancialRecord updated = recordRepo.save(record);
+        auditLogService.log(userId,"UPDATE","FINANCIAL_RECORD",updated.getId());
+        return mapper.toResponse(updated);
     }
 
     public void delete(Long id, Long userId) {
-
         FinancialRecord record = recordRepo.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.RECORD_NOT_FOUND));
 
@@ -86,5 +88,6 @@ public class FinancialRecordService {
             throw new AppException(ErrorCode.FORBIDDEN);
         }
         recordRepo.delete(record);
+        auditLogService.log(userId,"UPDATE","FINANCIAL_RECORD",id);
     }
 }

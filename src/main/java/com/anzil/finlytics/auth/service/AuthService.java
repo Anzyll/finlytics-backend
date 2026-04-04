@@ -9,6 +9,7 @@ import com.anzil.finlytics.security.JwtUtil;
 import com.anzil.finlytics.user.entity.User;
 import com.anzil.finlytics.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -31,7 +32,6 @@ public class AuthService {
         user.setPassword(passwordEncoder.encode(request.password()));
 
         User saved = userRepository.save(user);
-
         return new RegisterResponse(
                 saved.getId(),
                 saved.getEmail(),

@@ -11,6 +11,7 @@ import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.List;
 
+
 @Service
 @RequiredArgsConstructor
 public class DashboardService {
@@ -18,10 +19,11 @@ public class DashboardService {
     private final FinancialRecordRepository repo;
     private final FinancialRecordMapper mapper;
 
-    public DashboardSummaryResponse getSummary(Long userId) {
+    // 🔹 SUMMARY (GLOBAL)
+    public DashboardSummaryResponse getSummary() {
 
-        BigDecimal income = repo.getTotalIncome(userId);
-        BigDecimal expense = repo.getTotalExpense(userId);
+        BigDecimal income = repo.getTotalIncome();
+        BigDecimal expense = repo.getTotalExpense();
 
         return new DashboardSummaryResponse(
                 income,
@@ -30,27 +32,35 @@ public class DashboardService {
         );
     }
 
-    public List<CategorySummaryResponse> getCategorySummary(Long userId) {
-        return repo.getCategorySummary(userId);
+    // 🔹 CATEGORY SUMMARY (GLOBAL)
+    public List<CategorySummaryResponse> getCategorySummary() {
+        return repo.getCategorySummary();
     }
 
-    public List<FinancialRecordResponse> getRecent(Long userId) {
+    // 🔹 RECENT RECORDS (GLOBAL)
+    public List<FinancialRecordResponse> getRecent() {
 
-        return repo.findTop5ByUserIdOrderByDateDesc(userId)
+        return repo.findTop5ByOrderByDateDesc()
                 .stream()
                 .map(mapper::toResponse)
                 .toList();
     }
-    public InsightResponse getInsights(Long userId) {
 
-        List<Object[]> list = repo.getTopExpenseCategoryList(userId);
-        Object[] top = list.isEmpty() ? null : list.get(0);
+    // 🔹 INSIGHTS (GLOBAL)
+    public InsightResponse getInsights() {
 
-        String category = top != null ? (String) top[0] : "N/A";
-        BigDecimal topAmount = top != null ? (BigDecimal) top[1] : BigDecimal.ZERO;
+        // 🔥 Top Category (DTO, not Object[])
+        List<TopCategoryResponse> list = repo.getTopExpenseCategory();
+        TopCategoryResponse top = list.isEmpty()
+                ? new TopCategoryResponse("N/A", BigDecimal.ZERO)
+                : list.get(0);
 
-        BigDecimal totalExpense = repo.getTotalExpense(userId);
+        String category = top.category();
+        BigDecimal topAmount = top.total();
 
+        BigDecimal totalExpense = repo.getTotalExpense();
+
+        // 🔹 Percentage calculation
         BigDecimal percentage = BigDecimal.ZERO;
 
         if (totalExpense.compareTo(BigDecimal.ZERO) > 0) {
@@ -59,6 +69,7 @@ public class DashboardService {
                     .divide(totalExpense, 2, RoundingMode.HALF_UP);
         }
 
+        // 🔥 DATE LOGIC (GLOBAL)
         LocalDate now = LocalDate.now();
 
         LocalDate currentStart = now.withDayOfMonth(1);
@@ -67,8 +78,8 @@ public class DashboardService {
         LocalDate prevStart = currentStart.minusMonths(1);
         LocalDate prevEnd = currentStart.minusDays(1);
 
-        BigDecimal current = repo.getExpenseBetween(userId, currentStart, currentEnd);
-        BigDecimal previous = repo.getExpenseBetween(userId, prevStart, prevEnd);
+        BigDecimal current = repo.getExpenseBetweenGlobal(currentStart, currentEnd);
+        BigDecimal previous = repo.getExpenseBetweenGlobal(prevStart, prevEnd);
 
         String trend;
 
