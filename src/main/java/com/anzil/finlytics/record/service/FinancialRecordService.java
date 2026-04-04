@@ -40,6 +40,7 @@ public class FinancialRecordService {
             Long categoryId,
             LocalDate startDate,
             LocalDate endDate,
+            String search,
             int page,
             int size
 
@@ -48,7 +49,7 @@ public class FinancialRecordService {
         Pageable pageable = PageRequest.of(page, size, Sort.by("date").descending());
 
         Page<FinancialRecord> records =
-                recordRepo.findByFilters(userId, type, categoryId, startDate, endDate, pageable);
+                recordRepo.findByFilters(userId, type, categoryId, startDate, endDate,search, pageable);
 
         return records.map(mapper::toResponse);
     }

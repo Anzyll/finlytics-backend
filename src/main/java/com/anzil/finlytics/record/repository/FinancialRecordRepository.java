@@ -23,6 +23,11 @@ public interface FinancialRecordRepository extends JpaRepository<FinancialRecord
     AND (:categoryId IS NULL OR r.category.id = :categoryId)
     AND (:startDate IS NULL OR r.date >= :startDate)
     AND (:endDate IS NULL OR r.date <= :endDate)
+    AND (
+        :search IS NULL OR
+        LOWER(r.notes) LIKE LOWER(CONCAT('%', :search, '%')) OR
+        LOWER(r.category.name) LIKE LOWER(CONCAT('%', :search, '%'))
+    )
 """)
     Page<FinancialRecord> findByFilters(
             Long userId,
@@ -30,6 +35,7 @@ public interface FinancialRecordRepository extends JpaRepository<FinancialRecord
             Long categoryId,
             LocalDate startDate,
             LocalDate endDate,
+            String search,
             Pageable pageable
     );
 

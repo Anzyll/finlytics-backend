@@ -32,14 +32,16 @@ public class FinancialRecordController {
             @RequestParam(required = false) Long categoryId,
             @RequestParam(required = false) LocalDate startDate,
             @RequestParam(required = false) LocalDate endDate,
+            @RequestParam(required = false) String search,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
+
     ) {
 
         Long userId = SecurityUtil.getCurrentUserId();
 
         return ResponseEntity.ok(
-                service.getFilteredRecords(userId, type, categoryId, startDate, endDate,page,size)
+                service.getFilteredRecords(userId, type, categoryId, startDate, endDate,search,page,size)
         );
     }
 
