@@ -46,7 +46,7 @@ public class FinancialRecordController {
         Long userId = SecurityUtil.getCurrentUserId();
 
         return ResponseEntity.ok(
-                service.getFilteredRecords(userId, type, categoryId, startDate, endDate,search,page,size)
+                service.getFilteredRecords(type, categoryId, startDate, endDate,search,page,size)
         );
     }
 

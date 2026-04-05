@@ -37,7 +37,6 @@ public class FinancialRecordService {
     }
 
     public Page<FinancialRecordResponse> getFilteredRecords(
-            Long userId,
             String type,
             Long categoryId,
             LocalDate startDate,
@@ -51,7 +50,7 @@ public class FinancialRecordService {
         Pageable pageable = PageRequest.of(page, size, Sort.by("date").descending());
 
         Page<FinancialRecord> records =
-                recordRepo.findByFilters(userId, type, categoryId, startDate, endDate,search, pageable);
+                recordRepo.findByFilters( type, categoryId, startDate, endDate,search, pageable);
 
         return records.map(mapper::toResponse);
     }
@@ -60,10 +59,6 @@ public class FinancialRecordService {
 
         FinancialRecord record = recordRepo.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.RECORD_NOT_FOUND));
-
-        if (!record.getUserId().equals(userId)) {
-            throw new AppException(ErrorCode.FORBIDDEN);
-        }
 
         if (req.amount() != null) record.setAmount(req.amount());
         if (req.type() != null) record.setType(req.type());
@@ -84,9 +79,6 @@ public class FinancialRecordService {
         FinancialRecord record = recordRepo.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.RECORD_NOT_FOUND));
 
-        if (!record.getUserId().equals(userId)) {
-            throw new AppException(ErrorCode.FORBIDDEN);
-        }
         recordRepo.delete(record);
         auditLogService.log(userId,"UPDATE","FINANCIAL_RECORD",id);
     }

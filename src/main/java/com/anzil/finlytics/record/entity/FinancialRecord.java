@@ -22,6 +22,7 @@ public class FinancialRecord {
     private BigDecimal amount;
     private String type;
     private LocalDate date;
+    @Column(columnDefinition = "TEXT")
     private String notes;
     private LocalDateTime createdAt;
 }
