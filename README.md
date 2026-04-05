@@ -8,8 +8,7 @@ This project demonstrates backend design, data modeling, access control, and API
 
 ## 🚀 Live Demo
 
-* 🌐 Base URL: ``
-* 📘 Swagger Docs: ``
+* 📘 Swagger Docs: `https://finlytics-backend-production.up.railway.app/swagger-ui/index.html#/`
 
 ---
 
