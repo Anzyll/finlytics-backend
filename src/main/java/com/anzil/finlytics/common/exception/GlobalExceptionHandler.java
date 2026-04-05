@@ -11,6 +11,18 @@ import java.util.Map;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
+    @ExceptionHandler(org.springframework.security.authentication.BadCredentialsException.class)
+    public ResponseEntity<ErrorResponse> handleBadCredentials(
+            jakarta.servlet.http.HttpServletRequest request
+    ) {
+        return ResponseEntity.status(ErrorCode.INVALID_CREDENTIALS.getStatus())
+                .body(ErrorResponse.builder()
+                        .message(ErrorCode.INVALID_CREDENTIALS.getMessage())
+                        .errorCode(ErrorCode.INVALID_CREDENTIALS.name())
+                        .status(ErrorCode.INVALID_CREDENTIALS.getStatus().value())
+                        .timestamp(LocalDateTime.now())
+                        .build());
+    }
 
     @ExceptionHandler(AppException.class)
     public ResponseEntity<ErrorResponse> handleAppException(AppException ex) {
@@ -50,8 +62,8 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.internalServerError().body(
                 ErrorResponse.builder()
-                        .message(ex.getMessage())
-                        .errorCode("INTERNAL_SERVER_ERROR")
+                        .message(ErrorCode.INTERNAL_SERVER_ERROR.getMessage())
+                        .errorCode(ErrorCode.INTERNAL_SERVER_ERROR.name())
                         .status(500)
                         .timestamp(LocalDateTime.now())
                         .build()

@@ -19,7 +19,6 @@ public class DashboardService {
     private final FinancialRecordRepository repo;
     private final FinancialRecordMapper mapper;
 
-    // 🔹 SUMMARY (GLOBAL)
     public DashboardSummaryResponse getSummary() {
 
         BigDecimal income = repo.getTotalIncome();
@@ -32,12 +31,11 @@ public class DashboardService {
         );
     }
 
-    // 🔹 CATEGORY SUMMARY (GLOBAL)
     public List<CategorySummaryResponse> getCategorySummary() {
         return repo.getCategorySummary();
     }
 
-    // 🔹 RECENT RECORDS (GLOBAL)
+
     public List<FinancialRecordResponse> getRecent() {
 
         return repo.findTop5ByOrderByDateDesc()
@@ -46,10 +44,9 @@ public class DashboardService {
                 .toList();
     }
 
-    // 🔹 INSIGHTS (GLOBAL)
+
     public InsightResponse getInsights() {
 
-        // 🔥 Top Category (DTO, not Object[])
         List<TopCategoryResponse> list = repo.getTopExpenseCategory();
         TopCategoryResponse top = list.isEmpty()
                 ? new TopCategoryResponse("N/A", BigDecimal.ZERO)

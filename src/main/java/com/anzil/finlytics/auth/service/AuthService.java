@@ -5,6 +5,8 @@ import com.anzil.finlytics.auth.dto.LoginResponse;
 import com.anzil.finlytics.auth.dto.RegisterRequest;
 import com.anzil.finlytics.auth.dto.RegisterResponse;
 import com.anzil.finlytics.auth.mapper.UserMapper;
+import com.anzil.finlytics.common.exception.AppException;
+import com.anzil.finlytics.common.exception.ErrorCode;
 import com.anzil.finlytics.security.JwtUtil;
 import com.anzil.finlytics.user.entity.User;
 import com.anzil.finlytics.user.repository.UserRepository;
@@ -25,13 +27,14 @@ public class AuthService {
     public RegisterResponse register(RegisterRequest request) {
 
         if (userRepository.existsByEmail(request.email())) {
-            throw new RuntimeException("Email already exists");
+            throw new AppException(ErrorCode.EMAIL_ALREADY_EXISTS);
         }
 
         User user = userMapper.toEntity(request);
         user.setPassword(passwordEncoder.encode(request.password()));
 
         User saved = userRepository.save(user);
+
         return new RegisterResponse(
                 saved.getId(),
                 saved.getEmail(),
@@ -42,10 +45,10 @@ public class AuthService {
     public LoginResponse login(LoginRequest request) {
 
         User user = userRepository.findByEmail(request.email())
-                .orElseThrow(() -> new RuntimeException("Invalid credentials"));
+                .orElseThrow(() -> new AppException(ErrorCode.INVALID_CREDENTIALS));
 
         if (!passwordEncoder.matches(request.password(), user.getPassword())) {
-            throw new RuntimeException("Invalid credentials");
+            throw new AppException(ErrorCode.INVALID_CREDENTIALS);
         }
 
         String token = jwtUtil.generateToken(user.getEmail(), user.getRole().name());
@@ -55,5 +58,5 @@ public class AuthService {
                 user.getEmail(),
                 user.getRole().name()
         );
-}
+    }
 }
