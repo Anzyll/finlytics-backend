@@ -1,9 +1,7 @@
 package com.anzil.finlytics.auth.service;
 
-import com.anzil.finlytics.auth.dto.LoginRequest;
-import com.anzil.finlytics.auth.dto.LoginResponse;
-import com.anzil.finlytics.auth.dto.RegisterRequest;
-import com.anzil.finlytics.auth.dto.RegisterResponse;
+import com.anzil.finlytics.auth.dto.*;
+import com.anzil.finlytics.auth.entity.RefreshToken;
 import com.anzil.finlytics.auth.mapper.UserMapper;
 import com.anzil.finlytics.common.exception.AppException;
 import com.anzil.finlytics.common.exception.ErrorCode;
@@ -23,6 +21,7 @@ public class AuthService {
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
+    private final RefreshTokenService refreshTokenService;
 
     public RegisterResponse register(RegisterRequest request) {
 
@@ -58,5 +57,30 @@ public class AuthService {
                 user.getEmail(),
                 user.getRole().name()
         );
+    }
+    public AuthResult loginWithRefresh(LoginRequest request) {
+
+        User user = userRepository.findByEmail(request.email())
+                .orElseThrow(() -> new AppException(ErrorCode.INVALID_CREDENTIALS));
+
+        if (!passwordEncoder.matches(request.password(), user.getPassword())) {
+            throw new AppException(ErrorCode.INVALID_CREDENTIALS);
+        }
+
+        String accessToken = jwtUtil.generateToken(user.getEmail(), user.getRole().name());
+
+
+        RefreshToken refreshToken = refreshTokenService.createRefreshToken(user.getId());
+
+
+        return new AuthResult(
+                accessToken,
+                refreshToken.getToken(),
+                user.getEmail(),
+                user.getRole().name()
+        );
+    }
+    public String generateAccessToken(User user) {
+        return jwtUtil.generateToken(user.getEmail(), user.getRole().name());
     }
 }

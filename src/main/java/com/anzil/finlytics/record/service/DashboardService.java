@@ -57,7 +57,6 @@ public class DashboardService {
 
         BigDecimal totalExpense = repo.getTotalExpense();
 
-        // 🔹 Percentage calculation
         BigDecimal percentage = BigDecimal.ZERO;
 
         if (totalExpense.compareTo(BigDecimal.ZERO) > 0) {
@@ -66,7 +65,6 @@ public class DashboardService {
                     .divide(totalExpense, 2, RoundingMode.HALF_UP);
         }
 
-        // 🔥 DATE LOGIC (GLOBAL)
         LocalDate now = LocalDate.now();
 
         LocalDate currentStart = now.withDayOfMonth(1);
