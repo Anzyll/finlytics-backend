@@ -6,11 +6,6 @@ This project demonstrates backend design, data modeling, access control, and API
 
 ---
 
-## 🚀 Live Demo
-
-* 📘 Swagger Docs: `https://finlytics-backend-production.up.railway.app/swagger-ui/index.html#/`
-
----
 
 ## 🧠 Overview
 
@@ -305,7 +300,6 @@ spring.datasource.password=your_password
 
 ## 📈 Future Improvements
 
-* Refresh token implementation
 * Caching (Redis)
 * Rate limiting
 * Unit & integration tests
